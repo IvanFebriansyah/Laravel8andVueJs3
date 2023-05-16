@@ -60,7 +60,7 @@ class PostController extends Controller
 
         // Succes save to database
         if ($post) {
-            return response()->jsno([
+            return response()->json([
                 'succes' => true,
                 'message' => 'Post Created',
                 'data' => $post
@@ -74,11 +74,43 @@ class PostController extends Controller
         ], 409);
     }
 
+    public function update(Request $request, Post $post)
+    {
+        // set validation
+        $validator = Validator::make($request->all(), [
+            'title' => 'required',
+            'content' => 'required',
+        ]);
+
+        // responses error validation
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        // find post by ID
+        $post = Post::findOrFail($post->id);
+
+        if ($post) {
+
+            // Update post
+            $post->update([
+                'title' => $request->title,
+                'content' => $request->content
+            ]);
+
+            return response()->json([
+                'succes' => true,
+                'message' => 'Post Updated',
+                'data' => $post
+            ], 200);
+        }
+    }
+
 
     public function destroy($id)
     {
         // find post by id
-        $post = Post::fintOrfail($id);
+        $post = Post::findOrfail($id);
 
         if ($post) {
             // delete post
@@ -96,6 +128,6 @@ class PostController extends Controller
         return response()->json([
             'succes' => false,
             'message' => 'Post Not Found'
-        ], 400);
+        ], 404);
     }
 }
